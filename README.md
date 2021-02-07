@@ -14,3 +14,6 @@ Docker Compose (local) implementation of Airflow v2
 2. Run `cd airflow_docker`
 3. Rename **.env.example** to **.env** and replace dummy values with yours
 4. Run `docker-compose up` then access the services
+
+## Tips
+- Run `docker exec airflow_docker_worker_1 bash pip install /datafueL/dist/datafuel-0.0.0-py3-none-any.whl`

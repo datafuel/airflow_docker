@@ -1,6 +1,7 @@
 version: '2.1'
 services:
     redis:
+        container_name: redis
         image: 'redis:5.0.5'
         # command: redis-server --requirepass redispass
 
@@ -17,6 +18,7 @@ services:
 
     webserver:
         image: datafuel/airflow:latest
+        container_name: webserver
         restart: always
         depends_on:
             - postgres
@@ -28,6 +30,7 @@ services:
             - AIRFLOW_ADMIN_FIRST_NAME=$AIRFLOW_ADMIN_FIRST_NAME
             - AIRFLOW_ADMIN_LAST_NAME=$AIRFLOW_ADMIN_LAST_NAME
             - AIRFLOW_ADMIN_EMAIL=$AIRFLOW_ADMIN_EMAIL
+            - AIRFLOW_CONN_TRINO=$AIRFLOW_CONN_TRINO
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
@@ -35,14 +38,16 @@ services:
         volumes:
             - ./dags:/usr/local/airflow/dags
             - ./airflow_dir/setup/airflow.cfg:${AIRFLOW_USER_HOME}/airflow.cfg
-            - ./airflow_dir/setup/setup.sh:${AIRFLOW_USER_HOME}/setup.sh
+            - ./airflow_dir/setup/webserver_setup.sh:${AIRFLOW_USER_HOME}/setup/webserver_setup.sh
+            - ./datafuel:/datafuel
+            - ./requirements:/requirements
             # Uncomment to include custom plugins
             # - ./plugins:/usr/local/airflow/plugins
         ports:
             - "8080:8080"
         stdin_open: true
         tty: true
-        command: /bin/bash setup.sh
+        command: /bin/bash setup/webserver_setup.sh
         # healthcheck:
         #     test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
         #     interval: 30s
@@ -51,6 +56,7 @@ services:
 
     flower:
         image: datafuel/airflow:latest
+        container_name: flower
         restart: always
         depends_on:
             - redis
@@ -67,12 +73,16 @@ services:
 
     scheduler:
         image: datafuel/airflow:latest
+        container_name: scheduler
         restart: always
         depends_on:
             - webserver
         volumes:
             - ./dags:/usr/local/airflow/dags
             - ./airflow_dir/setup/airflow.cfg/:${AIRFLOW_USER_HOME}/airflow.cfg
+            - ./airflow_dir/setup/scheduler_setup.sh:${AIRFLOW_USER_HOME}/setup/scheduler_setup.sh
+            - ./requirements:/requirements
+            - ./datafuel:/datafuel
             # - ./airflow_dir/airflow.cfg/:${AIRFLOW_USER_HOME}/airflow.cfg
             # - ./airflow_dir/entrypoint.sh:${AIRFLOW_USER_HOME}/entrypoint.sh
             # Uncomment to include custom plugins
@@ -86,15 +96,20 @@ services:
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
         command: airflow scheduler
+        
 
     worker:
         image: datafuel/airflow:latest
+        container_name: worker
         restart: always
         depends_on:
             - scheduler
         volumes:
             - ./dags:/usr/local/airflow/dags
             - ./airflow_dir/setup/airflow.cfg:${AIRFLOW_USER_HOME}/airflow.cfg
+            - ./requirements:/requirements
+            - ./airflow_dir/setup/worker_setup.sh:${AIRFLOW_USER_HOME}/setup/worker_setup.sh
+            - ./datafuel:/datafuel
             # - ./airflow_dir/airflow.cfg/:${AIRFLOW_USER_HOME}/airflow.cfg
             # - ./airflow_dir/entrypoint.sh:${AIRFLOW_USER_HOME}/entrypoint.sh
             # Uncomment to include custom plugins
@@ -106,7 +121,8 @@ services:
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
-        command: airflow celery worker
+        # command: airflow celery worker
+        command: /bin/bash setup/worker_setup.sh
 
 networks: 
     default: 

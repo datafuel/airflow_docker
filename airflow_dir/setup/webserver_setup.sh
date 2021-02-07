@@ -9,4 +9,10 @@ airflow users create \
     --role Admin \
     --email $AIRFLOW_ADMIN_EMAIL
 
+airflow connections add 'trino' \
+    --conn-uri 'presto://amir@trino-coordinator:8080/hive'
+
+# pip install /datafuel/dist/datafuel-0.0.0-py3-none-any.whl
+pip install -r /requirements/requirements.txt
+
 airflow webserver --port 8080
