@@ -59,7 +59,7 @@ RUN set -ex \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
-    && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
+    && pip install apache-airflow[crypto,celery,postgres,hive,presto,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
     && if [ -n "${PYTHON_DEPS}" ]; then pip install ${PYTHON_DEPS}; fi \
     && apt-get purge --auto-remove -yqq $buildDeps \
@@ -85,6 +85,12 @@ RUN chown -R airflow: ${AIRFLOW_USER_HOME}
 EXPOSE 8080 5555 8793
 
 USER airflow
+ENV NB_USER=jovyan
+ENV PYTHONPATH=${PYTHONPATH}:/datafuel:${AIRFLOW_HOME}/dags}
+ENV PATH=${PATH}:/datafuel
 WORKDIR ${AIRFLOW_USER_HOME}
+
+# Basic packages
+RUN pip install minio requests pandas
 # ENTRYPOINT ["setup.sh"]
 # CMD ["airflow webserver"]
