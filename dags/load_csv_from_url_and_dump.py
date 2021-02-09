@@ -13,7 +13,7 @@ from datafuel.trino_fuel import (get_engine, add_datetime_suffix,
     run_SQL, create_table, create_table_by_hook, get_hook_engine, 
     insert_records)
 from datafuel.minio_fuel import (get_minio_client, df_to_csv_inMinio,
-    df_to_csv_inDatalake, csv_inMinio_to_df)
+    df_to_csv_inDatalake, csv_inMinio_to_df, url_to_csv_inMinio)
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 
@@ -63,17 +63,23 @@ def load_sirene_data(
         """
         
 
-        df = pd.read_csv(url)
-        logging.info('DataFrame successfully loaded')
-        logging.info(df.shape)
-        logging.info(df.columns)
+        # df = pd.read_csv(url)
+        # logging.info('DataFrame successfully loaded')
+        # logging.info(df.shape)
+        # logging.info(df.columns)
         
-        dump_metadata = df_to_csv_inMinio(
-            df=df, 
-            bucket=landing_bucket, 
-            obj_path=f"{landing_directory}/{table_name}.csv",
+        dump_metadata = url_to_csv_inMinio(
+            url=url, 
+            bucket=landing_bucket,
+            obj_path=f"{landing_directory}/{table_name}.csv"
         )
-        logging.info('Dataframe successfully dumped in datalake')
+        
+        # df_to_csv_inMinio(
+        #     df=df, 
+        #     bucket=landing_bucket, 
+        #     obj_path=f"{landing_directory}/{table_name}.csv",
+        # )
+        logging.info(f'CSV from {url} successfully landed')
         return dump_metadata
         # create_table_by_hook(df, table_name)
         

@@ -1,6 +1,7 @@
 from minio import Minio
 from io import BytesIO
 import pandas as pd
+import requests as rq
 
 def df_to_csv_inDatalake(df, bucket, schema, table_name, file_format):
     csv_bytes = df.to_csv().encode('utf-8')
@@ -57,3 +58,18 @@ def csv_inMinio_to_df(bucket, obj_path):
     )
     df = pd.read_csv(obj)
     return df
+
+
+def url_to_csv_inMinio(url, bucket, obj_path):
+    response = rq.get(url)
+    data = response.text.encode('utf-8')
+    minio_client = get_minio_client()
+    minio_client.put_object(
+        bucket_name=bucket,
+        object_name=obj_path,
+        data=BytesIO(data),
+        length=len(data),
+        content_type='application/csv'
+    )
+
+    return {"obj_path":obj_path, "bucket":bucket}
