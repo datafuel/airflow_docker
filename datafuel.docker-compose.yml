@@ -5,7 +5,7 @@ services:
         image: 'redis:5.0.5'
         # command: redis-server --requirepass redispass
 
-    postgres:
+    postgres_airflow:
         image: postgres:latest
         environment:
             - POSTGRES_USER=$POSTGRES_AIRFLOW_USER
@@ -21,10 +21,11 @@ services:
         container_name: webserver
         restart: always
         depends_on:
-            - postgres
+            - postgres_airflow
             - redis
         environment:
-            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CELERY__RESULT_BACKEND_SECRET=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
             - AIRFLOW_ADMIN_USERNAME=$AIRFLOW_ADMIN_USERNAME
             - AIRFLOW_ADMIN_PASSWORD=$AIRFLOW_ADMIN_PASSWORD
             - AIRFLOW_ADMIN_FIRST_NAME=$AIRFLOW_ADMIN_FIRST_NAME
@@ -62,8 +63,8 @@ services:
             - redis
         environment:
             - EXECUTOR=Celery
-            - AIRFLOW__CELERY__RESULT_BACKEND_SECRET=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/${POSTGRES_AIRFLOW_DB}
-            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CELERY__RESULT_BACKEND_SECRET=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
             # - REDIS_PASSWORD=redispass
         volumes:
             - ./airflow_dir/setup/airflow.cfg:${AIRFLOW_USER_HOME}/airflow.cfg
@@ -90,7 +91,8 @@ services:
         environment:
             - LOAD_EX=n
             - EXECUTOR=Celery
-            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CELERY__RESULT_BACKEND_SECRET=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
@@ -116,8 +118,8 @@ services:
             # - ./plugins:/usr/local/airflow/plugins
         environment:
             - EXECUTOR=Celery
-            - AIRFLOW__CELERY__RESULT_BACKEND_SECRET=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/${POSTGRES_AIRFLOW_DB}
-            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/${POSTGRES_AIRFLOW_DB}            # - POSTGRES_USER=airflow
+            - AIRFLOW__CELERY__RESULT_BACKEND_SECRET=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}
+            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres_airflow:5432/${POSTGRES_AIRFLOW_DB}            # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
