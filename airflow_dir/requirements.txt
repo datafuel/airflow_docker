@@ -1,0 +1,6 @@
+minio 
+requests 
+pandas
+pyodbc
+dbt
+dbt-dremio
