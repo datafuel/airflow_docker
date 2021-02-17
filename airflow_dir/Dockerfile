@@ -4,8 +4,8 @@
 # BUILD: docker build --rm -t puckel/docker-airflow .
 # SOURCE: https://github.com/puckel/docker-airflow
 
-FROM python:3.7-slim-buster
-LABEL maintainer="Puckel_"
+FROM ubuntu:latest
+LABEL maintainer="datafuel"
 
 # Never prompt the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
@@ -14,8 +14,6 @@ ENV TERM linux
 # Airflow
 ARG AIRFLOW_VERSION=2.0.1
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
-ARG AIRFLOW_DEPS=""
-ARG PYTHON_DEPS=""
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
 # Define en_US.
@@ -50,18 +48,26 @@ RUN set -ex \
         rsync \
         netcat \
         locales \
+        unixodbc-dev \
+        python3-dev \
+        python3.7 \
+        python3-pip \
     && sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
-    && useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow \
+    && useradd -ms /bin/bash -d ${AIRFLOW_USER_HOME} airflow
+
+# Change Aliases
+RUN cd "$(dirname $(which python3))" \
+    && ln -s python3 python \
+    && ln -s pip3 pip \
     && pip install -U pip setuptools wheel \
     && pip install pytz \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
-    && pip install apache-airflow[crypto,celery,postgres,hive,presto,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
+    && pip install apache-airflow==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
-    && if [ -n "${PYTHON_DEPS}" ]; then pip install ${PYTHON_DEPS}; fi \
     && apt-get purge --auto-remove -yqq $buildDeps \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
@@ -72,6 +78,7 @@ RUN set -ex \
         /usr/share/man \
         /usr/share/doc \
         /usr/share/doc-base
+        
 
 # COPY script/entrypoint.sh /entrypoint.sh
 # COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
@@ -84,6 +91,18 @@ RUN chown -R airflow: ${AIRFLOW_USER_HOME}
 
 EXPOSE 8080 5555 8793
 
+
+
+
+WORKDIR /drivers
+COPY ./drivers .
+RUN dpkg -i dremio-odbc_1.5.1.1001-2_amd64.deb
+ENV PATH ${PATH}:/drivers
+
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 USER airflow
 ENV NB_USER=jovyan
 ENV PYTHONPATH=${PYTHONPATH}:/datafuel:${AIRFLOW_HOME}/dags}
@@ -91,6 +110,5 @@ ENV PATH=${PATH}:/datafuel
 WORKDIR ${AIRFLOW_USER_HOME}
 
 # Basic packages
-RUN pip install minio requests pandas
 # ENTRYPOINT ["setup.sh"]
 # CMD ["airflow webserver"]
