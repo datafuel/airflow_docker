@@ -22,7 +22,7 @@ default_args = {
     'owner': 'ABO',
 }
 @dag(default_args=default_args, schedule_interval=None, start_date=days_ago(2), tags=['datalake'])
-def load_sirene_data(
+def presto_load_sirene_data(
     landing_bucket: str = "landing-bucket",
     landing_directory: str = "siren",
     datalake_bucket: str = "datalake-bucket",

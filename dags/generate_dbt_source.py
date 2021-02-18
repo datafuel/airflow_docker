@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 import logging 
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
-from airflow.operators import BashOperator
+from airflow.operators.bash import BashOperator
 sys.path.append('/datafuel/')
 from datafuel.trino_fuel import (get_engine, add_datetime_suffix, 
     run_SQL, create_table, create_table_by_hook, get_hook_engine, 
@@ -55,7 +55,7 @@ def generate_dbt_source(
     
     dbt_clone = BashOperator(
         task_id='dbt_clone',
-        bash_command=f'mkdir /dbt && cd /dbt && git clone {PROJECT_GITHUB_REPO}',
+        bash_command='mkdir /dbt && cd /dbt && git clone https://github.com/datafuel/sirene-06_dbt.git',
         dag=dag
     )
 
@@ -67,7 +67,7 @@ def generate_dbt_source(
 
     dbt_debug = BashOperator(
         task_id='dbt_deps',
-        bash_command=f'cd /dbt/{PROJECT_REPO} && ls -l',
+        bash_command='cd /dbt/sirene-06_dbt && ls -l',
         dag=dag
     )    
 

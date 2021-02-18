@@ -66,7 +66,7 @@ RUN cd "$(dirname $(which python3))" \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
-    && pip install apache-airflow==${AIRFLOW_VERSION} \
+    && pip install apache-airflow[crypto,celery,postgres,presto,jdbc,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
     && apt-get purge --auto-remove -yqq $buildDeps \
     && apt-get autoremove -yqq --purge \
@@ -90,9 +90,6 @@ RUN cd "$(dirname $(which python3))" \
 RUN chown -R airflow: ${AIRFLOW_USER_HOME}
 
 EXPOSE 8080 5555 8793
-
-
-
 
 WORKDIR /drivers
 COPY ./drivers .

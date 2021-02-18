@@ -7,7 +7,6 @@ from sqlalchemy import create_engine
 import logging 
 from airflow.decorators import dag, task
 from airflow.utils.dates import days_ago
-from airflow.providers.presto.hooks.presto import PrestoHook
 sys.path.append('/datafuel/')
 from datafuel.trino_fuel import (get_engine, add_datetime_suffix, 
     run_SQL, create_table, create_table_by_hook, get_hook_engine, 
