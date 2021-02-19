@@ -33,6 +33,7 @@ def generate_dbt_source(
     DREMIO_SCHEMA: str = "stg",
     DREMIO_USER: str = "amirb",
     DREMIO_PASSWORD: str = "pass4dremio",
+    DREMIO_MANAGED_OR_UNMANAGED: str = "MANAGED",
     PROJECT_GITHUB_REPO: str = "https://github.com/datafuel/sirene-06_dbt.git",
     PROJECT_REPO: str = "sirene-06_dbt"
 ):
@@ -76,7 +77,8 @@ def generate_dbt_source(
             "DREMIO_DATABASE":DREMIO_DATABASE,
             "DREMIO_SCHEMA":DREMIO_SCHEMA,
             "DREMIO_USER":DREMIO_USER,
-            "DREMIO_PASSWORD":DREMIO_PASSWORD
+            "DREMIO_PASSWORD":DREMIO_PASSWORD,
+            "DREMIO_MANAGED_OR_UNMANAGED":DREMIO_MANAGED_OR_UNMANAGED
         }
     )    
 
