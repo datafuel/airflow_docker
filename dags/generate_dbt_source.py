@@ -33,7 +33,7 @@ def generate_dbt_source(
     DREMIO_SCHEMA: str = "stg",
     DREMIO_USER: str = "amirb",
     DREMIO_PASSWORD: str = "pass4dremio",
-    DREMIO_MANAGED_OR_UNMANAGED: str = "MANAGED",
+    DREMIO_MANAGED_OR_UNMANAGED: str = "managed",
     PROJECT_GITHUB_REPO: str = "https://github.com/datafuel/sirene-06_dbt.git",
     PROJECT_REPO: str = "sirene-06_dbt"
 ):
@@ -67,7 +67,7 @@ def generate_dbt_source(
     """
     # debug_command="cd ~/home/dbt/sirene-06_dbt && ls"
     dbt_debug = BashOperator(
-        task_id='dbt_deps',
+        task_id='dbt_debug',
         bash_command=debug_command,
         env={
             "DREMIO_DRIVER":DREMIO_DRIVER,
@@ -80,11 +80,32 @@ def generate_dbt_source(
             "DREMIO_PASSWORD":DREMIO_PASSWORD,
             "DREMIO_MANAGED_OR_UNMANAGED":DREMIO_MANAGED_OR_UNMANAGED
         }
-    )    
+    )   
+
+    run_command = """
+    cd ~/home/dbt/sirene-06_dbt \
+        && ls \
+        && dbt run --profiles-dir profiles
+    """ 
+    dbt_run = BashOperator(
+        task_id='dbt_run',
+        bash_command=run_command,
+        env={
+            "DREMIO_DRIVER":DREMIO_DRIVER,
+            "DREMIO_HOST":DREMIO_HOST,
+            "DREMIO_PORT":DREMIO_PORT,
+            "DREMIO_ENVIRONMENT":DREMIO_ENVIRONMENT,
+            "DREMIO_DATABASE":DREMIO_DATABASE,
+            "DREMIO_SCHEMA":DREMIO_SCHEMA,
+            "DREMIO_USER":DREMIO_USER,
+            "DREMIO_PASSWORD":DREMIO_PASSWORD,
+            "DREMIO_MANAGED_OR_UNMANAGED":DREMIO_MANAGED_OR_UNMANAGED
+        }
+    )
 
 # dbt_deps.set_upstream(dbt_clone)
         
-    clean_dbt_project >> dbt_clone >> dbt_debug
+    clean_dbt_project >> dbt_clone >> dbt_debug >> dbt_run
     # generate_dbt_vars >> dbt_debug
     
     
