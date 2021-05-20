@@ -24,5 +24,9 @@ Official Apache Airflow local docker compose setup
 - **Airflow username** : airflow
 - **Airflow password** : airflow
 
+# Add python libraries to the *datafuel/airflow* docker image
+1. Add your libraries to the */docker_build/requirements.txt* file
+2. Run `cd docker_build` and run `docker compose build` to rebuild the *datafuel/airflow* docker image
+3. Your python libraries are now added to the *datafuel/airflow* docker image
 
 
