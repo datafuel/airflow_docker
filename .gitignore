@@ -1,1 +1,9 @@
+# docker compose environment variables files
 .env
+
+# python temp files
+**/__pycache__/
+
+**/*.egg-info/
+
+**/dist/
