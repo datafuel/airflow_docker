@@ -51,14 +51,12 @@
         AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
         AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
         AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
-        CREDENTIALS_GOOGLE_PATH: ${GOOGLE_APPLICATION_CREDENTIALS}
       volumes:
         - ./dags:/opt/airflow/dags
         - ./logs:/opt/airflow/logs
         - ./plugins:/opt/airflow/plugins
         - ./datafuel:/datafuel
         - ./airflow_variables:/airflow_variables
-        
       user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
       depends_on:
         redis:
@@ -136,5 +134,10 @@
           retries: 5
         restart: always
     
+    networks: 
+      default: 
+        external: 
+          name: datafuel-local-network   
+           
     volumes:
       postgres-db-volume:

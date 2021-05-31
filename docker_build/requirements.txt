@@ -1,2 +1,3 @@
 pandas
 minio
+pandas-gbq
