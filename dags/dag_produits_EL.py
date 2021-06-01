@@ -78,14 +78,8 @@ def extract_load_in_dwh(
     source_password = variables_dict["source_password"]
     source_host= variables_dict["source_host"]
     source_port= variables_dict["source_port"]
-    source_database= variables_dict["source_database"]
-
-    destination_username= variables_dict["destination_username"]
-    destination_password= variables_dict["destination_password"]
-    destination_host= variables_dict["destination_host"]
-    destination_port= variables_dict["destination_port"]
-    destination_database= variables_dict["destination_database"]
-    
+    source_database= variables_dict["source_database"] 
+    destination_dataset_name= variables_dict["destination_dataset_name"]
 
     tables_to_import= variables_dict["tables_to_import"]
     
@@ -109,34 +103,41 @@ def extract_load_in_dwh(
     logging.info(df.shape)
     logging.info(df.head(1))
 
-    engine = get_postgres_engine(
-        username = destination_username,
-        password = destination_password,
-        host = destination_host,
-        port = destination_port,
-        database = destination_database
-    )  
+    # engine = get_postgres_engine(
+    #     username = destination_username,
+    #     password = destination_password,
+    #     host = destination_host,
+    #     port = destination_port,
+    #     database = destination_database
+    # )  
 
-    # Créer un schema à partir d'un engine (sil n'existe pas)
+    # # Créer un schema à partir d'un engine (sil n'existe pas)
     
-    with engine.connect() as connection:
-        result = connection.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_destination}")
+    # with engine.connect() as connection:
+    #     result = connection.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_destination}")
 
-    with  get_postgres_connexion(
-        username = destination_username,
-        password = destination_password,
-        host = destination_host,
-        port = destination_port,
-        database = destination_database
-    ) as destin_conn:
+    # with  get_postgres_connexion(
+    #     username = destination_username,
+    #     password = destination_password,
+    #     host = destination_host,
+    #     port = destination_port,
+    #     database = destination_database
+    # ) as destin_conn:
 
-        df.to_sql(
-            name = table_name,
-            con = destin_conn,
-            schema = schema_destination,
-            if_exists = "replace"
-        )   
-    logging.info(f"chargement du Dataframe réussi dans la db {destination_database} de la table {schema_destination}.{table_name}")
+        # df.to_sql(
+        #     name = table_name,
+        #     con = destin_conn,
+        #     schema = schema_destination,
+        #     if_exists = "replace"
+        # )   
+    credentials = get_credentials()
+    
+    df.to_gbq(
+        destination_table = f"{destination_dataset_name}.{table_name}",
+        if_exists = "replace",
+        credentials=credentials
+    )  
+    logging.info(f"chargement du Dataframe réussi dans BigQuery dans la table {destination_dataset_name}.{table_name}")
 
 
 

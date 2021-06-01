@@ -4,11 +4,7 @@
     "source_host": "postgres_read_replica",
     "source_port": "5432",
     "source_database": "emsdb",
-    "destination_username": "postgres",
-    "destination_password": "password4db",
-    "destination_host": "datawarehouse",
-    "destination_port": "5432",
-    "destination_database": "dwhdb",
+    "destination_dataset_name":"stg",    
     "functional_table_group": "produits",
     "tables_to_import": [
         {
