@@ -184,7 +184,7 @@ def create_dag(
 
 
 args = {
-    'owner': 'A_LA',
+    'owner': 'Brocoli',
     'depends_on_past': False,
     'start_date': days_ago(2),
     'email': ['bigdataetl@gmail.com'],
@@ -196,7 +196,7 @@ args = {
     'max_active_runs': 1
 }
 
-DAG_ID = "dag_produits_EL"
+DAG_ID = "dag_clients_EL"
 DAG_SCHEDULE = None
 AIRFLOW_VARIABLE_NAME = f"{DAG_ID}_var"
 variables_dict = Variable.get(
