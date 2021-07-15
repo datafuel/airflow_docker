@@ -17,8 +17,8 @@ Official Apache Airflow local docker compose setup
 2. Run `cd airflow_docker`
 3. Run `echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env` **(only on first use)**
 4. Run `cd docker_build` and run `docker compose build`
-5. Run `cd ..` and run `docker-compose up airflow-init` **(only on first use)**
-6. Run `docker compose up` then access airflow on http://localhost:8080
+5. Run `cd ..` and run `docker-compose -f datafuel.docker-compose.yml up airflow-init` **(only on first use)**
+6. Run `docker compose -f datafuel.docker-compose.yml up` then access airflow on http://localhost:8080
 
 # Default Credentials
 - **Airflow username** : airflow

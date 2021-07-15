@@ -68,21 +68,22 @@ def get_postgres_engine(
 # ----- python callables -----
 
 def extract_load_in_dwh(
-    variables_dict : str,
+    year: str,
+    month: str,
+    file_type: str,
     schema_source : str,
-    schema_destination : str,
-    table_name : str
+    table_name : str,
+    variables_dict: dict
 ) :
     
     source_username= variables_dict["source_username"]
     source_password = variables_dict["source_password"]
     source_host= variables_dict["source_host"]
     source_port= variables_dict["source_port"]
-    source_database= variables_dict["source_database"] 
-    destination_dataset_name= variables_dict["destination_dataset_name"]
+    source_database= variables_dict["source_database"]
+    bucket_name_datalake= variables_dict["bucket_name_datalake"]
+    domaine= variables_dict["domaine"]
 
-    tables_to_import= variables_dict["tables_to_import"]
-    
         
     logging.info(f"schema : {schema_source}")
     logging.info(f"table : {table_name}")
@@ -103,41 +104,21 @@ def extract_load_in_dwh(
     logging.info(df.shape)
     logging.info(df.head(1))
 
-    # engine = get_postgres_engine(
-    #     username = destination_username,
-    #     password = destination_password,
-    #     host = destination_host,
-    #     port = destination_port,
-    #     database = destination_database
-    # )  
-
-    # # Créer un schema à partir d'un engine (sil n'existe pas)
+    now = datetime.now()
+    year =  now.year if year == "" or year is None else year
+    month =  now.month if month == "" or month is None else month  
+        
     
-    # with engine.connect() as connection:
-    #     result = connection.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_destination}")
-
-    # with  get_postgres_connexion(
-    #     username = destination_username,
-    #     password = destination_password,
-    #     host = destination_host,
-    #     port = destination_port,
-    #     database = destination_database
-    # ) as destin_conn:
-
-        # df.to_sql(
-        #     name = table_name,
-        #     con = destin_conn,
-        #     schema = schema_destination,
-        #     if_exists = "replace"
-        # )   
-    credentials = get_credentials()
     
-    df.to_gbq(
-        destination_table = f"{destination_dataset_name}.{table_name}",
-        if_exists = "replace",
-        credentials=credentials
-    )  
-    logging.info(f"chargement du Dataframe réussi dans BigQuery dans la table {destination_dataset_name}.{table_name}")
+    print(f'using gs://{bucket_name_datalake.lower()}/{domaine.lower()}/{table_name.lower()}/year={year}/month={month}')
+    
+    if file_type.lower() == 'csv':
+      
+        df.to_csv(
+            path_or_buf = f"gs://{bucket_name_datalake.lower()}/{domaine.lower()}/{table_name.lower()}/year={year}/month={month}",
+            index = "False",
+        )  
+        logging.info(f"chargement du Dataframe réussi dans BigQuery dans la repértoire gs://{bucket_name_datalake.lower()}/{domaine.lower()}/{table_name.lower()}/year={year}/month={month}")
 
 
 
@@ -164,16 +145,22 @@ def create_dag(
         )
         # operator qui va permettre d'appeler la fonction get_tables_to_import 
         # en utilisant le parametre python callable
+
+        
+
                 
         for table in variables_dict['tables_to_import']:
+            
             task = PythonOperator(
                 task_id= f'load_{table["table_name"]}',
                 python_callable=extract_load_in_dwh,
                 op_kwargs={
                     "variables_dict" : variables_dict,
                     "schema_source" : table["schema_source"], 
-                    "schema_destination" : table["schema_destination"],
-                    "table_name" : table["table_name"]
+                    "table_name" : table["table_name"],
+                    "year": table["year"],
+                    "month":table["month"],
+                    "file_type":table["file_type"]
                 },
                 dag=dag
             )   
@@ -196,7 +183,7 @@ args = {
     'max_active_runs': 1
 }
 
-DAG_ID = "dag_clients_EL"
+DAG_ID = "dag_load_to_gcs"
 DAG_SCHEDULE = None
 AIRFLOW_VARIABLE_NAME = f"{DAG_ID}_var"
 variables_dict = Variable.get(

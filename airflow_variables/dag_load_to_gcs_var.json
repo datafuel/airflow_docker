@@ -4,12 +4,15 @@
     "source_host": "odoo_db",
     "source_port": "5432",
     "source_database": "odoo",
-    "destination_dataset_name":"stg",    
-    "functional_table_group": "clients",
+    "bucket_name_datalake":"brocolitest-internal-datalake-bucket",
+    "domaine":"ventes",
+    
     "tables_to_import": [
         {
+            "year":"",
+            "month":"3",
+            "file_type":"csv",
             "schema_source" : "public",
-            "schema_destination" : "stg",
             "table_name" : "res_partner"
         }        
     ]

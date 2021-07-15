@@ -1,3 +1,5 @@
 pandas
 minio
 pandas-gbq
+fsspec
+gcsfs
