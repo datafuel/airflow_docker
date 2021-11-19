@@ -114,11 +114,18 @@ def extract_load_in_dwh(
     
     if file_type.lower() == 'csv':
         gcs_path += f"/{table_name}.csv"
-        print("using ",gcs_path)
+        logging.info("using ",gcs_path)
         df.to_csv(
             path_or_buf = gcs_path,
             index = False,
         )  
+    elif file_type.lower() == 'parquet':
+        gcs_path += f"/{table_name}.parquet"
+        logging.info("using ",gcs_path)
+        df.to_parquet(
+            path=gcs_path,
+            index=False
+        )
         logging.info(f"chargement du Dataframe réussi dans BigQuery dans la repértoire", gcs_path)
 
 
