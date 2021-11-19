@@ -1,0 +1,27 @@
+{
+    "source_username": "odoo",
+    "source_password": "odoo",
+    "source_host": "odoo_db",
+    "source_port": "5432",
+    "source_database": "odoo_db",
+    "bucket_name_datalake":"brocolitest-internal-datalake-bucket",
+    "domaine":"sales",
+    
+    "tables_to_import": [
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "sale_order"
+        },
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "sale_order_line"
+        }        
+    ]
+
+}

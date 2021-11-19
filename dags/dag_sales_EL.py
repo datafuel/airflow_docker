@@ -117,7 +117,7 @@ def extract_load_in_dwh(
         print("using ",gcs_path)
         df.to_csv(
             path_or_buf = gcs_path,
-            index = False,
+            index = "False",
         )  
         logging.info(f"chargement du Dataframe réussi dans BigQuery dans la repértoire", gcs_path)
 
@@ -184,7 +184,7 @@ args = {
     'max_active_runs': 1
 }
 
-DAG_ID = "dag_load_to_gcs_product"
+DAG_ID = "dag_load_to_gcs_sales"
 DAG_SCHEDULE = None
 AIRFLOW_VARIABLE_NAME = f"{DAG_ID}_var"
 variables_dict = Variable.get(

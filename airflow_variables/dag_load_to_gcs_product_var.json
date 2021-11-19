@@ -42,7 +42,50 @@
             "file_type":"csv",
             "schema_source" : "public",
             "table_name" : "product_pricelist"
-        }        
+        }, 
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "product_template"
+        },
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "product_template_attribute_line"
+        },
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "product_template_attribute_value"
+        },
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "product_variant_combination"
+        },
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "product_pricelist_item"
+        },
+        {
+            "year":"",
+            "month":"",
+            "file_type":"csv",
+            "schema_source" : "public",
+            "table_name" : "product_attribute_product_template_rel"
+        }
+
     ]
 
 }
