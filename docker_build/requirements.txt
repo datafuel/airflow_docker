@@ -3,3 +3,4 @@ minio
 pandas-gbq
 fsspec
 gcsfs
+pyarrow
