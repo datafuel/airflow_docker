@@ -6,14 +6,16 @@ import requests as rq
 from sqlalchemy import create_engine
 import logging 
 from airflow.decorators import dag, task
+from airflow.operators.python import PythonVirtualenvOperator
 from airflow.utils.dates import days_ago
 sys.path.append('/datafuel/')
 from datafuel.trino_fuel import (get_engine, add_datetime_suffix, 
     run_SQL, create_table, create_table_by_hook, get_hook_engine, 
     insert_records)
 from datafuel.minio_fuel import (get_minio_client, df_to_csv_inMinio,
-    df_to_csv_inDatalake, csv_inMinio_to_df, url_to_csv_inMinio)
-
+    df_to_csv_inDatalake, csv_inMinio_to_df, url_to_csv_inMinio, generate_timestamp, 
+    put_local_file_in_bucket)
+# from datafuel.EDA_fuel import generate_report
 from datafuel.dremio_fuel import (login_to_dremio, promote_folder, unpromote_folder)
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
@@ -28,6 +30,7 @@ def csv_to_lakehouse(
     landing_bucket: str = "landing-bucket",
     landing_directory: str = "siren",
     datalake_bucket: str = "datalake-bucket",
+    static_bucket: str = "static-bucket",
     url: str = "https://data.cquest.org/geo_sirene/v2019/last/communes/06033.csv",
     table_name: str = "siren_06033",
     schema: str = "stg", 
@@ -74,7 +77,7 @@ def csv_to_lakehouse(
     
     
     @task(multiple_outputs=True)
-    def extract_and_dump_inStagingBucket(
+    def extract_and_dump(
         url: str, 
         table_name: str, 
         landing_bucket: str,
@@ -107,11 +110,66 @@ def csv_to_lakehouse(
         return dump_metadata
         # create_table_by_hook(df, table_name)
         
+
+    @task()
+    def generate_profile(
+        datalake_name: str,
+        datalake_bucket: str,
+        table_name: str, 
+        schema: str, 
+        dump_metadata: dict,
+        landing_directory: str,
+        static_bucket: str
+    ): 
+        """
+        #### Extract task
+        A simple Extract task to get data ready for the rest of the data
+        pipeline. In this case, getting data is simulated by reading from a
+        hardcoded JSON string.
+        """
+
+        from dataprep.eda import create_report
+        import tempfile
+        import logging
+
+        OUTPUT_FILE_NAME = 'pandas_profile'
+
+        def generate_report(
+            df, 
+            title="Pandas Profiling Report"
+        ):
+
+            temp_directory = tempfile.TemporaryDirectory()
+            report = create_report(df, title=title)
+            report.save(filename=OUTPUT_FILE_NAME, to=temp_directory.name)
+            output_path = f'{temp_directory.name}/{OUTPUT_FILE_NAME}'
+            logging.info(f'Successfully loaded df profile to {output_path}')
+
+            return output_path
+    
+        df = csv_inMinio_to_df(
+            bucket = dump_metadata['bucket'], 
+            obj_path=dump_metadata['obj_path']
+        )
+
+        logging.info('dtypes')
+        logging.info(df.dtypes)
+        logging.info('DataFrame successfully loaded')
         
+        output_path = generate_report(df)
+        object_path = f"{schema}/{landing_directory}/{table_name}/{table_name}_{generate_timestamp()}.html"
+        logging.info(f'Uploading to {object_path}')
+        put_local_file_in_bucket(
+            output_path=output_path, 
+            bucket=static_bucket,
+            object_path=object_path, 
+            content_type="text/html"
+        )
+        # return output_path
 
     
     @task()
-    def extract_fromStagingBucket_and_load_inDatalake(
+    def load_in_datalake(
         datalake_name: str,
         datalake_bucket: str,
         table_name: str, 
@@ -167,7 +225,7 @@ def csv_to_lakehouse(
         dremio_password=dremio_password,
     )
 
-    dump_metadata = extract_and_dump_inStagingBucket(
+    dump_metadata = extract_and_dump(
         url=url, 
         table_name=table_name, 
         landing_bucket=landing_bucket,
@@ -175,9 +233,33 @@ def csv_to_lakehouse(
         is_clean=is_clean
     )
 
-    # log_datalake(schema=schema)
+    # generate_profile(
+    #     datalake_name=datalake_name,
+    #     datalake_bucket=datalake_bucket,
+    #     landing_directory=landing_directory,
+    #     table_name=table_name, 
+    #     schema=schema,
+    #     static_bucket=static_bucket,
+    #     dump_metadata=dump_metadata
+    # )
 
-    extract_fromStagingBucket_and_load_inDatalake(
+    generate_task = PythonVirtualenvOperator(
+        task_id="virtualenv_python",
+        python_callable=generate_profile,
+        requirements=["dataprep", "pandas", "requests", "minio"],
+        op_kwargs={
+            "datalake_name":datalake_name,
+            "datalake_bucket":datalake_bucket,
+            "landing_directory":landing_directory,
+            "table_name":table_name, 
+            "schema":schema,
+            "static_bucket":static_bucket,
+            "dump_metadata":dump_metadata
+        }
+    )
+
+
+    load_in_datalake(
         datalake_name=datalake_name,
         datalake_bucket=datalake_bucket, 
         table_name=table_name, 
