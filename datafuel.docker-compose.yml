@@ -38,6 +38,7 @@ services:
             # - REDIS_PASSWORD=redispass
         volumes:
             - ./dags:/usr/local/airflow/dags
+            - ./airflow_variables:/airflow_variables
             - ./airflow_dir/setup/airflow.cfg:${AIRFLOW_USER_HOME}/airflow.cfg
             - ./airflow_dir/setup/webserver_setup.sh:${AIRFLOW_USER_HOME}/setup/webserver_setup.sh
             - ./datafuel:/datafuel
@@ -80,6 +81,7 @@ services:
             - webserver
         volumes:
             - ./dags:/usr/local/airflow/dags
+            - ./airflow_variables:/airflow_variables
             - ./airflow_dir/setup/airflow.cfg/:${AIRFLOW_USER_HOME}/airflow.cfg
             - ./airflow_dir/setup/scheduler_setup.sh:${AIRFLOW_USER_HOME}/setup/scheduler_setup.sh
             - ./requirements:/requirements
@@ -108,6 +110,7 @@ services:
             - scheduler
         volumes:
             - ./dags:/usr/local/airflow/dags
+            - ./airflow_variables:/airflow_variables
             - ./airflow_dir/setup/airflow.cfg:${AIRFLOW_USER_HOME}/airflow.cfg
             - ./requirements:/requirements
             - ./airflow_dir/setup/worker_setup.sh:${AIRFLOW_USER_HOME}/setup/worker_setup.sh
