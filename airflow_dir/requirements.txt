@@ -4,3 +4,4 @@ pandas
 pyodbc
 dbt
 dbt-dremio
+great_expectations
