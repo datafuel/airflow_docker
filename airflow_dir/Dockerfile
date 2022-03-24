@@ -66,8 +66,9 @@ RUN cd "$(dirname $(which python3))" \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
-    && pip install apache-airflow[crypto,celery,postgres,presto,jdbc,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
+    && pip install apache-airflow[crypto,celery,postgres,docker,presto,jdbc,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
+    && pip install virtualenv \
     && apt-get purge --auto-remove -yqq $buildDeps \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
@@ -95,7 +96,6 @@ WORKDIR /drivers
 COPY ./drivers .
 RUN dpkg -i dremio-odbc_1.5.1.1001-2_amd64.deb
 ENV PATH ${PATH}:/drivers
-
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
