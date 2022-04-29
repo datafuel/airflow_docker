@@ -1,15 +1,21 @@
 from minio import Minio
+from minio.deleteobjects import DeleteObject
 from io import BytesIO
 import pandas as pd
 import requests as rq
 from datetime import datetime as dt
 import json
 
-def df_to_csv_inDatalake(df, bucket, schema, table_name, file_format):
+def df_to_csv_inDatalake(
+    df: pd.DataFrame, 
+    bucket: str, 
+    schema: str, 
+    table_name: str
+):
     csv_bytes = df.to_csv().encode('utf-8')
     csv_buffer = BytesIO(csv_bytes)
     minio_client = get_minio_client()
-    obj_path = f'{schema}/{table_name}/{table_name}.{file_format}'
+    obj_path = f'{schema}/{table_name}/{table_name}.csv'
     minio_client.put_object(
         bucket,
         obj_path,
@@ -127,3 +133,12 @@ def get_json_fromMinio(bucket_name, object_name):
     data = minio_client.get_object(bucket_name, object_name)
     return json.load(BytesIO(data.data))
 
+
+def delete_objects_in_minio(bucket: str, objects: list):
+    minio_client = get_minio_client()
+    errors = minio_client.remove_objects(
+        bucket,
+        [DeleteObject(o) for o in objects],
+    )
+    for e in errors:
+        raise Exception(f"Error during delete_objects() : {e}")
