@@ -11,7 +11,7 @@ import json
 import os
 from airflow.decorators import dag, task
 
-DEFAULT_ARGS = {"owner": "amine_larhrib"}
+DEFAULT_ARGS = {"owner": "datafuel"}
 
 
 # ----- python callables -----
