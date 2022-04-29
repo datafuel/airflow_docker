@@ -3,3 +3,5 @@ minio
 pandas-gbq
 fsspec
 gcsfs
+xlrd
+openpyxl
