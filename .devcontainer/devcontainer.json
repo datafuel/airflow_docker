@@ -1,0 +1,11 @@
+{
+	"name": "airflow_dag_lab",
+	"dockerComposeFile": "../datafuel.docker-compose.yml",
+	"service": "dag_lab",
+	"workspaceFolder": "/opt/airflow/dags",
+	"shutdownAction": "stopCompose",
+	"extensions": [
+	  "ms-python.python",
+	  "njpwerner.autodocstring"
+	]
+}
