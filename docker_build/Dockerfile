@@ -5,5 +5,4 @@ FROM apache/airflow:latest
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# ENV PYTHONPATH=${PYTHONPATH}:/datafuel:${AIRFLOW_HOME}/dags}
-ENV PATH=${PATH}:/datafuel
+ENV PYTHONPATH=${PYTHONPATH}:/datafuel_libraries
