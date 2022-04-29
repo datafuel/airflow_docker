@@ -54,10 +54,12 @@ x-airflow-common:
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
-    AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
+    AIRFLOW__CORE__XCOM_BACKEND: 'datafuel.minio_backend.MinioXComBackend'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
+    - ./datafuel:/datafuel_libraries
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
@@ -235,6 +237,7 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     user: "0:0"
     volumes:
+      - ./datafuel:/datafuel_libraries
       - .:/sources
 
   airflow-cli:
@@ -265,6 +268,16 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+
+  dag_lab:
+    <<: *airflow-common
+    container_name: dag_lab
+    stdin_open: true
+    tty: true
+    user: airflow
+    entrypoint: /bin/bash
+    environment:
+      <<: *airflow-common-env
 
 networks: 
   default: 
